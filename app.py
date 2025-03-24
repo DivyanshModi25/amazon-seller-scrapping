@@ -34,7 +34,7 @@ def main():
         "600001": "Tamil Nadu",
         "700002": "kolkata",
     }
-    host_url = "https://www.amazon.in/Nordic-Naturals-Ultimate-Omega-Lemon/dp/"
+    host_url = "https://www.amazon.in/dp/"
 
     timestamp_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     output_filename = f"amazon_scraped_{timestamp_now}.csv"
@@ -42,7 +42,7 @@ def main():
     try:
         with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['Asin', 'Timestamp', 'Pincode', 'City', 'Seller', 'Price'])  # Header
+            writer.writerow(['Asin', 'Timestamp', 'Pincode', 'City', 'Seller', 'Price' ,'coupon_text'])  # Header
         print(f"CSV header written to {output_filename}")
     except Exception as e:
         print(f"Error creating CSV: {e}")
