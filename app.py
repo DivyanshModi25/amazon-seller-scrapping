@@ -1,115 +1,57 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
-# import gspread
-# from oauth2client.service_account import ServiceAccountCredentials
+import os
 import pandas as pd
-from io import StringIO
-import csv
 from datetime import datetime
+import csv
+from bot import amazon_main
 
 
 
-app = Flask(__name__)
+# main function
+def main():
+    csv_file_path = './fry_amazon_india_data.csv'  # Input CSV path
 
-# Enable CORS for all routes
-CORS(app)
-
-
-# @app.route('/get-data')
-# def getData():
-  
-
-#     # Define the scope
-#     scope = ["https://spreadsheets.google.com/feeds", 
-#                  "https://www.googleapis.com/auth/spreadsheets",
-#                  "https://www.googleapis.com/auth/drive"]
-
-#     # Load credentials from the downloaded JSON
-#     creds = ServiceAccountCredentials.from_json_keyfile_name("/home/divyansh/Downloads/practical-theme-433607-e1-883bba711d0c.json", scope)
-
-#     # Authorize the client
-#     client = gspread.authorize(creds)
-
-
-#     sheet = client.open("amazon_seller").sheet1  # or .worksheet("Sheet1")
-
-#     # Read data
-#     data = sheet.get_all_records()
-#     # print("Current Data:", data)
-
-#     ssn_list = [row['ssn'] for row in data]
-#     print(ssn_list)
-#     website_host="https://www.amazon.in/Nordic-Naturals-Ultimate-Omega-Lemon/dp"
-#     city_list = [key for key in data[0].keys() if key != 'ssn']
-#     print(city_list)
-
-
-#     return jsonify({"status": "success", "data": data})
-
-
-now = datetime.now()
-timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
-filename_str = now.strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
-url_link="https://www.amazon.in/Nordic-Naturals-Ultimate-Omega-Lemon/dp/"
-
-
-
-@app.route('/scrape-data',methods=['POST'])
-def scrapper():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
-    
-    file = request.files['file']
-    
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+    if not os.path.exists(csv_file_path):
+        print(f"File not found: {csv_file_path}")
+        exit()
 
     try:
-        # Read CSV content
-        csv_data = file.read().decode('utf-8')
-        df = pd.read_csv(StringIO(csv_data))
-
-        # Extract the first column
+        df = pd.read_csv(csv_file_path)
         asin_list = df.iloc[:, 0].tolist()
-
-
-
-        # import bot
-        pincodes=["400097"]
-        data=[]
-
-
-
-        with open(filename_str, mode='w', newline='') as file:
-            writer = csv.writer(file)
-
-            # Header row
-            writer.writerow(['Item', 'Pincode', 'Seller', 'Price', 'Timestamp'])
-
-            # Data rows
-            for entry in data:
-                asin = entry['asin']
-                for location in entry['locations']:
-                    row = [
-                        asin,
-                        timestamp_str,
-                        location['pincode'],
-                        location['seller'],
-                        location['price']
-                    ]
-                    writer.writerow(row)
-
-
-
-
-
-        return jsonify({"asin_list": asin_list}), 200
+        print(f"ASINs Extracted: {asin_list}")
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error reading CSV: {e}")
+        exit()
+
+    pincodes = ["400097", "110001"]
+     
+
+    city_map = {
+        "400097": "mumbai",
+        "110001": "delhi",
+        "560001": "bangalore",
+        "500001": "hyderabad",
+        "201301": "noida",
+        "600001": "Tamil Nadu",
+        "700002": "kolkata",
+    }
+    host_url = "https://www.amazon.in/Nordic-Naturals-Ultimate-Omega-Lemon/dp/"
+
+    timestamp_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_filename = f"amazon_scraped_{timestamp_now}.csv"
+
+    try:
+        with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Asin', 'Timestamp', 'Pincode', 'City', 'Seller', 'Price'])  # Header
+        print(f"CSV header written to {output_filename}")
+    except Exception as e:
+        print(f"Error creating CSV: {e}")
+        exit()
+
+    amazon_main(pincodes, asin_list, host_url, output_filename, city_map)
+
+    print(f"\nAll data written to {output_filename}")
 
 
-
-
- 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    main()
