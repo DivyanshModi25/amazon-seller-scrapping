@@ -64,19 +64,19 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                 seller_text = seller.text
 
                 # Scrape price (adjust XPATH if needed)
-                price = driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[5]/div[4]/div[13]/div/div/div[4]/div[1]/span[3]/span[2]/span[2]")
+                price = driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[5]/div[1]/div[4]/div/div[1]/div/div/div/form/div/div/div/div/div[3]/div/div[1]/div/div/span[1]/span[2]/span[2]")
                 price_text = price.text
 
                 # Coupon scraping
                 try:
-                    # Coupon elements often have id/class like "couponBadge" or contain "discount"
-                    # Update this XPATH based on actual HTML of coupon element
-                    coupon = driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[5]/div[4]/div[13]/div/div/div[37]/div/span/div/span/label")
-                    coupon_text = coupon.text.strip()
+                    label = driver.find_element(By.XPATH, "//label[contains(@id, 'couponText')]")
+                    # print("scrapped label")
+                    coupon_text = label.text.split("\n")[0].strip()
+                    # print("failed here")
                 except:
                     coupon_text = "no discount"
 
-                print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text}")
+                print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text}")
 
             except Exception as e:
                 print(f"Error at Pincode {location}, ASIN {asin}: {e}")
