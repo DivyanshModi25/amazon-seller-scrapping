@@ -22,7 +22,7 @@ def main():
         print(f"Error reading CSV: {e}")
         exit()
 
-    pincodes = ["400097", "110001"]
+    pincodes = ["400097", "110001","560001","500001","201301","600001","700002"]
      
 
     city_map = {
