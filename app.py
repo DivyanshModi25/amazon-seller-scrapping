@@ -59,8 +59,8 @@ def main():
         print(f"Error reading CSV: {e}")
         exit()
 
-    pincodes = ["400097", "110001"]
-    # ,"560001","500001","201301","600001","700002"
+    pincodes = ["400097", "110001","560001","500001","600001","700002"]
+    
      
     city_map = {
         "400097": "mumbai",
@@ -90,9 +90,8 @@ def main():
     print(f"\nAll data written to {output_filename}")
 
     # Send email after CSV is created
-    recipient_emails = os.getenv("RECIPIENT_EMAIL").split(",")  # Change to actual recipient
-    for recipient in recipient_emails:
-        send_email(output_filename, recipient.strip())
+    recipient_emails = os.getenv("RECIPIENT_EMAIL")
+    send_email(output_filename, recipient_emails)
 
 if __name__ == "__main__":
     main()

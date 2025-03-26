@@ -24,6 +24,8 @@ def initialize_driver():
 
 # scraper
 def enter_location(driver, locations, asin_list, host_url, output_filename, city_map):
+    driver.get("https://www.amazon.in/dp/B015TQ7USO")
+    time.sleep(3)
     for location in locations:
         try:
             # Go to Amazon home page to change location first
@@ -72,6 +74,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                     label = driver.find_element(By.XPATH, "//label[contains(@id, 'couponText')]")
                     # print("scrapped label")
                     coupon_text = label.text.split("\n")[0].strip()
+                    coupon_text=coupon_text.replace("Apply","").strip()
                     # print("failed here")
                 except:
                     coupon_text = "no discount"
