@@ -100,4 +100,3 @@ def amazon_main(locations, asin_list, host_url, output_filename, city_map):
     enter_location(driver, locations, asin_list, host_url, output_filename, city_map)
     driver.quit()
 
-
