@@ -57,6 +57,8 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
             seller_text = "no_buy_box"
             price_text = ""
             coupon_text=""
+            free_delivery=""
+            fastest_delivery=""
 
             try:
                 time.sleep(2)
@@ -79,14 +81,26 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                 except:
                     coupon_text = "no discount"
 
-                print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text}")
+                try:
+                    free_delivery_element=driver.find_element(By.XPATH,'//*[@id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE"]/span/span')
+                    free_delivery=free_delivery_element.text
+                except:
+                    free_delivery=""
+
+                try:
+                    fastest_delivery_element=driver.find_element(By.XPATH,'//*[@id="mir-layout-DELIVERY_BLOCK-slot-SECONDARY_DELIVERY_MESSAGE_LARGE"]/span/span[1]')
+                    fastest_delivery=fastest_delivery_element.text
+                except:
+                    fastest_delivery=""                
+
+                print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text},free delivery:{free_delivery}, fastest_delivery:{fastest_delivery}")
 
             except Exception as e:
                 print(f"Error at Pincode {location}, ASIN {asin}: {e}")
                 # Leave seller_text and price_text empty
 
             # Write data to CSV regardless
-            row = [asin, timestamp, location, city, seller_text, price_text ,coupon_text]
+            row = [asin, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery]
             with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                 csv.writer(file).writerow(row)
             print(f"Written data for ASIN {asin}, Pincode {location}")

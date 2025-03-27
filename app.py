@@ -79,7 +79,7 @@ def main():
     try:
         with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['Asin', 'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text'])  # Header
+            writer.writerow(['Asin', 'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery'])  # Header
         print(f"CSV header written to {output_filename}")
     except Exception as e:
         print(f"Error creating CSV: {e}")
