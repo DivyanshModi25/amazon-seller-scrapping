@@ -59,7 +59,8 @@ def main():
         print(f"Error reading CSV: {e}")
         exit()
 
-    pincodes = ["400097", "110001","560001","500001","600001","700002"]
+    pincodes = ["400097", "110001","560001"]
+    # ,"500001","600001","700002"
     
      
     city_map = {
@@ -79,7 +80,7 @@ def main():
     try:
         with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['Asin', 'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
+            writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
         print(f"CSV header written to {output_filename}")
     except Exception as e:
         print(f"Error creating CSV: {e}")
@@ -90,8 +91,8 @@ def main():
     print(f"\nAll data written to {output_filename}")
 
     # Send email after CSV is created
-    recipient_emails = os.getenv("RECIPIENT_EMAIL")
-    send_email(output_filename, recipient_emails)
+    # recipient_emails = os.getenv("RECIPIENT_EMAIL")
+    # send_email(output_filename, recipient_emails)
 
 if __name__ == "__main__":
     main()

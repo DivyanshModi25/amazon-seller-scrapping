@@ -112,22 +112,78 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                 except:
                     min_price=""
 
+                row = [asin,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+
+                with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
+                    csv.writer(file).writerow(row)
+                print(f"Written data for ASIN {asin}, Pincode {location}")
+
+                if(seller_count!=""):
+                    
+                    open_panel=driver.find_element(By.XPATH,'//*[@id="dynamic-aod-ingress-box"]/div/div[2]/a')
+                    open_panel.click()
+                    time.sleep(2)
+
+                    try:
+                        competitor_sellers=driver.find_elements(By.XPATH,'//*[@id="aod-offer"]')
+                        time.sleep(2)
+                        for seller in competitor_sellers:
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            city = city_map.get(location, "Unknown")
+                            seller_text = "no_buy_box"
+                            price_text = ""
+                            coupon_text=""
+                            free_delivery=""
+                            fastest_delivery=""
+                            seller_count=""
+                            min_price=""
+                            stars=""
+
+                            
+                            try:
+                                seller_name_element=seller.find_element(By.CSS_SELECTOR,'#aod-offer-soldBy > div > div > div.a-fixed-left-grid-col.a-col-right > a')
+                                seller_text=seller_name_element.text
+
+                                seller_price_element=seller.find_element(By.CLASS_NAME,'a-price-whole')
+                                price_text=seller_price_element.text
+
+                                delivery_time_element=seller.find_element(By.CSS_SELECTOR,'#mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE > span > span')
+                                free_delivery=delivery_time_element.text
+
+                                try:
+                                    coupon_text_element=seller.find_element(By.XPATH,"//label[contains(@id, 'couponText')]")
+                                    coupon_text=coupon_text_element.text
+                                except:
+                                    coupon_text=''
+                                
+                                row=[asin,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
+                                with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
+                                    csv.writer(file).writerow(row)
+                            except:
+                                pass 
+
+
+                    except:
+                        print("no compititor!!")
+                        
+                
 
 
             except Exception as e:
                 print(f"Error at Pincode {location}, ASIN {asin}: {e}")
+                row = [asin,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
                 # Leave seller_text and price_text empty
+                with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
+                    csv.writer(file).writerow(row)
+                print(f"Written data for ASIN {asin}, Pincode {location}")
 
             
             print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text},free delivery:{free_delivery}, fastest_delivery:{fastest_delivery},seller count:{seller_count}, minimum price={min_price}")
 
 
             # Write data to CSV regardless
-            row = [asin, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
             
-            with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
-                csv.writer(file).writerow(row)
-            print(f"Written data for ASIN {asin}, Pincode {location}")
+            
 
 
 
