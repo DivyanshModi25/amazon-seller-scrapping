@@ -9,6 +9,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 import csv
 from datetime import datetime
+import re
 
 
 # driver
@@ -59,6 +60,8 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
             coupon_text=""
             free_delivery=""
             fastest_delivery=""
+            seller_count=""
+            min_price=""
 
             try:
                 time.sleep(2)
@@ -93,14 +96,35 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                 except:
                     fastest_delivery=""                
 
-                print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text},free delivery:{free_delivery}, fastest_delivery:{fastest_delivery}")
+
+                try:
+                    seller_count_element=driver.find_element(By.XPATH,'//*[@id="dynamic-aod-ingress-box"]/div/div[2]/a/span/span[1]')
+                    seller_count_text=seller_count_element.text
+                    parts = seller_count_text.split("(")  # Split at '('
+                    if len(parts) > 1:
+                        seller_count = parts[1].split(")")[0]  # Extract the number
+                except:
+                    seller_count=""
+
+                try:
+                    min_price_element=driver.find_element(By.XPATH,'//*[@id="dynamic-aod-ingress-box"]/div/div[2]/a/span/span[3]/span[2]/span[2]')
+                    min_price=min_price_element.text
+                except:
+                    min_price=""
+
+
 
             except Exception as e:
                 print(f"Error at Pincode {location}, ASIN {asin}: {e}")
                 # Leave seller_text and price_text empty
 
+            
+            print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text},free delivery:{free_delivery}, fastest_delivery:{fastest_delivery},seller count:{seller_count}, minimum price={min_price}")
+
+
             # Write data to CSV regardless
-            row = [asin, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery]
+            row = [asin, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+            
             with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                 csv.writer(file).writerow(row)
             print(f"Written data for ASIN {asin}, Pincode {location}")
