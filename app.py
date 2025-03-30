@@ -46,6 +46,12 @@ def send_email(output_filename, recipient_email):
 
 # Main function
 def main():
+    # Define the directory
+    output_dir = "./amazon_data"
+
+    # Ensure the directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
     csv_file_path = './fry_amazon_india_data.csv'  # Input CSV path
 
     if not os.path.exists(csv_file_path):
