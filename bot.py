@@ -134,10 +134,6 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                             price_text = ""
                             coupon_text=""
                             free_delivery=""
-                            fastest_delivery=""
-                            seller_count=""
-                            min_price=""
-                            stars=""
 
                             
                             try:
