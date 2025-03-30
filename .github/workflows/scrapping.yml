@@ -1,9 +1,9 @@
 name: Run Scraper Twice a Day
 
 on:
-  schedule:
-    - cron: '0 8 * * *'  # Runs every day at 8 AM UTC
-    - cron: '0 15 * * *'  # Runs every day at 3 PM UTC
+  # schedule:
+  #   - cron: '0 8 * * *'  # Runs every day at 8 AM UTC
+  #   - cron: '0 15 * * *'  # Runs every day at 3 PM UTC
   workflow_dispatch:
 
 jobs:
