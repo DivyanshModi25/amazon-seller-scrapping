@@ -51,7 +51,7 @@ def main():
 
     # Ensure the directory exists
     os.makedirs(output_dir, exist_ok=True)
-    
+
     csv_file_path = './fry_amazon_india_data.csv'  # Input CSV path
 
     if not os.path.exists(csv_file_path):
@@ -97,8 +97,8 @@ def main():
     print(f"\nAll data written to {output_filename}")
 
     # Send email after CSV is created
-    # recipient_emails = os.getenv("RECIPIENT_EMAIL")
-    # send_email(output_filename, recipient_emails)
+    recipient_emails = os.getenv("RECIPIENT_EMAIL")
+    send_email(output_filename, recipient_emails)
 
 if __name__ == "__main__":
     main()
