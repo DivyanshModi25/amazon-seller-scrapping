@@ -15,7 +15,7 @@ import re
 # driver
 def initialize_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
+    # options.add_argument("--headless=new")
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     # options.add_argument("--disable-gpu")
@@ -27,8 +27,8 @@ def initialize_driver():
 
 # scraper
 def enter_location(driver, locations, asin_list, host_url, output_filename, city_map):
-    driver.get("https://www.amazon.in/dp/B015TQ7USO")
-    time.sleep(3)
+    # driver.get("https://www.amazon.in/dp/B015TQ7USO")
+    # time.sleep(3)
     for location in locations:
         try:
             # Go to Amazon home page to change location first
@@ -53,7 +53,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
 
         # After setting location, scrape all ASINs for this location
         for asin in asin_list:
-            target_webpage = f"{host_url}{asin}"
+            target_webpage = f"{host_url}{asin}/ref=sr_1_1?nsdOptOutParam=true&th=1"
             driver.get(target_webpage)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             city = city_map.get(location, "Unknown")

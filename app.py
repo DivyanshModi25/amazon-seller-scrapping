@@ -47,12 +47,15 @@ def send_email(output_filename, recipient_email):
 # Main function
 def main():
     # Define the directory
+
+    company='nordic'
+
     output_dir = "./amazon_data"
 
     # Ensure the directory exists
     os.makedirs(output_dir, exist_ok=True)
 
-    csv_file_path = './fry_amazon_india_data.csv'  # Input CSV path
+    csv_file_path = f'./{company}.csv'  # Input CSV path
 
     if not os.path.exists(csv_file_path):
         print(f"File not found: {csv_file_path}")
@@ -65,23 +68,24 @@ def main():
         print(f"Error reading CSV: {e}")
         exit()
 
-    pincodes = ["400097","110001","560001","500001","600001","700002"]
+    pincodes = ["400001","110001","560001","500001","600001","226001","700002"]
     
     
      
     city_map = {
-        "400097": "mumbai",
-        "110001": "delhi",
-        "560001": "bangalore",
-        "500001": "hyderabad",
+        "400001": "Mumbai",
+        "110001": "Delhi",
+        "560001": "Bangalore",
+        "500001": "Hyderabad",
         "201301": "noida",
-        "600001": "Tamil Nadu",
-        "700002": "kolkata",
+        "600001": "Chennai",
+        "700002": "Kolkata",
+        "226001":"Lucknow"
     }
     host_url = "https://www.amazon.in/dp/"
 
     timestamp_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_filename = f"./amazon_data/amazon_scraped_{timestamp_now}.csv"
+    output_filename = f"./amazon_data/{company}_{timestamp_now}.csv"
 
     try:
         with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
