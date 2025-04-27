@@ -45,13 +45,10 @@ def send_email(output_filename, recipient_email):
         print(f"Error sending email: {e}")
 
 # Main function
-def main():
-    # Define the directory
-
-    company='nordic'
-
+def main(company,pincodes,city_map,sendMailFlag):
+    
+    # Define the directory    
     output_dir = "./amazon_data"
-
     # Ensure the directory exists
     os.makedirs(output_dir, exist_ok=True)
 
@@ -68,23 +65,10 @@ def main():
         print(f"Error reading CSV: {e}")
         exit()
 
-    pincodes = ["400001","110001","560001","500001","600001","226001","700002"]
     
-    
-     
-    city_map = {
-        "400001": "Mumbai",
-        "110001": "Delhi",
-        "560001": "Bangalore",
-        "500001": "Hyderabad",
-        "201301": "noida",
-        "600001": "Chennai",
-        "700002": "Kolkata",
-        "226001":"Lucknow"
-    }
     host_url = "https://www.amazon.in/dp/"
 
-    timestamp_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     output_filename = f"./amazon_data/{company}_{timestamp_now}.csv"
 
     try:
@@ -101,8 +85,27 @@ def main():
     print(f"\nAll data written to {output_filename}")
 
     # Send email after CSV is created
-    recipient_emails = os.getenv("RECIPIENT_EMAIL")
-    send_email(output_filename, recipient_emails)
+    if(sendMailFlag):
+        recipient_emails = os.getenv("RECIPIENT_EMAIL")
+        send_email(output_filename, recipient_emails)
+
+
+
+
 
 if __name__ == "__main__":
-    main()
+
+    company='nordic'
+    pincodes = ["400001","110001","560001","500001","600001","226001","700002"]
+    city_map = {
+        "400001": "Mumbai",
+        "110001": "Delhi",
+        "560001": "Bangalore",
+        "500001": "Hyderabad",
+        "201301": "noida",
+        "600001": "Chennai",
+        "700002": "Kolkata",
+        "226001":"Lucknow"
+    }
+    sendMailFlag=False   
+    main(company,pincodes,city_map,sendMailFlag)

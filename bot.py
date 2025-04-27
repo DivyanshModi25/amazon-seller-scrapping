@@ -55,7 +55,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
         for asin in asin_list:
             target_webpage = f"{host_url}{asin}/ref=sr_1_1?nsdOptOutParam=true&th=1"
             driver.get(target_webpage)
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
             city = city_map.get(location, "Unknown")
             seller_text = "no_buy_box"
             price_text = ""
