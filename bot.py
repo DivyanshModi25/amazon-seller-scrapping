@@ -27,16 +27,14 @@ def initialize_driver():
 
 # scraper
 def enter_location(driver, locations, asin_list, host_url, output_filename, city_map):
-    # driver.get("https://www.amazon.in/dp/B015TQ7USO")
-    # time.sleep(3)
     for location in locations:
         try:
             # Go to Amazon home page to change location first
-            driver.get("https://www.amazon.in/dp/B015TQ7USO")
+            driver.get("https://www.amazon.in")
             time.sleep(2)
 
             wait = WebDriverWait(driver, 5)
-            link = wait.until(EC.presence_of_element_located((By.ID, "contextualIngressPtLink")))
+            link = wait.until(EC.presence_of_element_located((By.ID, "nav-global-location-popover-link")))
             link.click()
             time.sleep(2)
 
@@ -78,11 +76,9 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
 
                 # Coupon scraping
                 try:
-                    label = driver.find_element(By.XPATH, "//label[contains(@id, 'couponText')]")
-                    # print("scrapped label")
-                    coupon_text = label.text.split("\n")[0].strip()
+                    label = driver.find_element(By.XPATH, "//span[contains(@id, 'couponText')]")
+                    coupon_text = label.text.split("|")[0].strip()
                     coupon_text=coupon_text.replace("Apply","").strip()
-                    # print("failed here")
                 except:
                     coupon_text = "no discount"
 
@@ -100,7 +96,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
 
 
                 try:
-                    seller_count_element=driver.find_element(By.XPATH,'//*[@id="dynamic-aod-ingress-box"]/div/div[2]/a/span/span[1]')
+                    seller_count_element=driver.find_element(By.XPATH,'//*[@id="aod-ingress-link"]/span[1]')
                     seller_count_text=seller_count_element.text
                     parts = seller_count_text.split("(")  # Split at '('
                     if len(parts) > 1:
@@ -109,7 +105,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                     seller_count=""
 
                 try:
-                    min_price_element=driver.find_element(By.XPATH,'//*[@id="dynamic-aod-ingress-box"]/div/div[2]/a/span/span[3]/span[2]/span[2]')
+                    min_price_element=driver.find_element(By.XPATH,'//*[@id="aod-ingress-link"]/span[3]/span[2]/span[2]')
                     min_price=min_price_element.text
                 except:
                     min_price=""
@@ -122,7 +118,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
 
                 if(seller_count!=""):
                     
-                    open_panel=driver.find_element(By.XPATH,'//*[@id="dynamic-aod-ingress-box"]/div/div[2]/a')
+                    open_panel=driver.find_element(By.XPATH,'//*[@id="aod-ingress-link"]')
                     open_panel.click()
                     time.sleep(2)
 
@@ -149,12 +145,14 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                                 free_delivery=delivery_time_element.text
 
                                 try:
-                                    coupon_text_element=seller.find_element(By.XPATH,"//label[contains(@id, 'couponText')]")
-                                    coupon_text=coupon_text_element.text.replace("Apply","").strip()
+                                    print("entered")
+                                    label = seller.find_element(By.XPATH, "//span[contains(@id, 'couponText')]")
+                                    coupon_text = label.text
+                                    print("coupon text:"+coupon_text)
                                 except:
-                                    coupon_text=''
+                                    coupon_text = "no discount"
                                 
-                                row=[asin,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
+                                row=[asin,"", timestamp, location, city, seller_text, price_text ,f'{coupon_text}',free_delivery,"","",""]
                                 with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                                     csv.writer(file).writerow(row)
                             except:
@@ -205,11 +203,11 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
 
                             try:
                                 coupon_text_element=seller.find_element(By.XPATH,"//label[contains(@id, 'couponText')]")
-                                coupon_text=coupon_text_element.text.replace("Apply","").strip()
+                                coupon_text=coupon_text_element.text
                             except:
-                                coupon_text=''
+                                coupon_text='no discount'
                             
-                            row=[asin,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
+                            row=[asin,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","",""]
                             with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                                 csv.writer(file).writerow(row)
                         except:
@@ -221,16 +219,8 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                         
                 
 
-                
-
             
             print(f"Success: Pincode {location}, ASIN {asin}, Seller: {seller_text}, Price: {price_text},coupon:{coupon_text},free delivery:{free_delivery}, fastest_delivery:{fastest_delivery},seller count:{seller_count}, minimum price={min_price}")
-
-
-            # Write data to CSV regardless
-            
-            
-
 
 
 

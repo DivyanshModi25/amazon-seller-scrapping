@@ -12,13 +12,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # emailing function
-def send_email(output_filename, recipient_email):
+def send_email(output_filename, recipient_email,pincodes):
     timestamp_now = datetime.now().strftime("Date: %d-%m-%Y TIME:%H:%M:%S")
 
     sender_email = os.getenv("SENDER_EMAIL")  
     sender_password = os.getenv("SENDER_PASSWORD") 
     subject = f"Amazon Scraped Data CSV for - {timestamp_now}"
-    body = f"Please find the attached CSV file containing the scraped data dated - {timestamp_now}"
+    body = f"Please find the attached CSV file containing the scraped data dated - {timestamp_now} for pincodes :- {pincodes}"
 
     # Create Email Message
     msg = EmailMessage()
@@ -87,7 +87,7 @@ def main(company,pincodes,city_map,sendMailFlag):
     # Send email after CSV is created
     if(sendMailFlag):
         recipient_emails = os.getenv("RECIPIENT_EMAIL")
-        send_email(output_filename, recipient_emails)
+        send_email(output_filename, recipient_emails,pincodes)
 
 
 
@@ -96,7 +96,8 @@ def main(company,pincodes,city_map,sendMailFlag):
 if __name__ == "__main__":
 
     company='nordic'
-    pincodes = ["400001","110001","560001","500001","600001","226001","700002"]
+    pincodes = ["600001","226001","700002"]
+    # "400001","400001","110001","560001","500001",
     city_map = {
         "400001": "Mumbai",
         "110001": "Delhi",
@@ -107,5 +108,5 @@ if __name__ == "__main__":
         "700002": "Kolkata",
         "226001":"Lucknow"
     }
-    sendMailFlag=False   
+    sendMailFlag=True    
     main(company,pincodes,city_map,sendMailFlag)
