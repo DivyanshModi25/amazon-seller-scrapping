@@ -96,8 +96,7 @@ def main(company,pincodes,city_map,sendMailFlag):
 if __name__ == "__main__":
 
     company='nordic'
-    pincodes = ["600001","226001","700002"]
-    # "400001","400001","110001","560001","500001",
+    pincodes = ["400001","110001","560001","500001","600001","226001","700002"]
     city_map = {
         "400001": "Mumbai",
         "110001": "Delhi",
