@@ -7,7 +7,7 @@ import mimetypes
 from email.message import EmailMessage
 from bot import amazon_main 
 from dotenv import load_dotenv
-print("test")
+
 
 load_dotenv()
 
