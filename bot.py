@@ -162,7 +162,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                                 try:
                                     # label = seller.find_element(By.XPATH, "//span[contains(@id, 'couponText')]")
                                     coupon_text_element=seller.find_element(By.CLASS_NAME,"couponLabelText")
-                                    coupon_text = label.text
+                                    coupon_text = coupon_text_element.text
                                 except:
                                     coupon_text = "no discount"
                                 
