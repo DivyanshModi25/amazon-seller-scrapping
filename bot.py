@@ -11,6 +11,7 @@ import csv
 from datetime import datetime
 import re
 
+print("hello")
 
 # driver
 def initialize_driver():
