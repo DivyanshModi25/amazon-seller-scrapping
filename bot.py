@@ -11,7 +11,6 @@ import csv
 from datetime import datetime
 import re
 
-print("hello")
 
 # driver
 def initialize_driver():
@@ -27,7 +26,7 @@ def initialize_driver():
 
 
 # scraper
-def enter_location(driver, locations, asin_list, host_url, output_filename, city_map):
+def enter_location(driver, locations, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag):
     for location in locations:
         try:
             # Go to Amazon home page to change location first
@@ -63,17 +62,29 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
             fastest_delivery=""
             seller_count=""
             min_price=""
+            product_title_text=""
 
             try:
                 time.sleep(2)
+
+                if(getProductTitleFlag):
+                    try:
+                        product_title=driver.find_element(By.XPATH,'//*[@id="productTitle"]')
+                        product_title_text=product_title.text
+                    except:
+                        product_title_text="title not found"
 
                 # Scrape seller
                 seller = driver.find_element(By.ID, "sellerProfileTriggerId")
                 seller_text = seller.text
 
-                # Scrape price (adjust XPATH if needed)
-                price = driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[5]/div[1]/div[4]/div/div[1]/div/div/div/form/div/div/div/div/div[3]/div/div[1]/div/div/span[1]/span[2]/span[2]")
-                price_text = price.text
+                # Scrape price 
+                try:
+                    # price = driver.find_element(By.XPATH, "/html/body/div[2]/div/div/div[5]/div[1]/div[4]/div/div[1]/div/div/div/form/div/div/div/div/div[3]/div/div[1]/div/div/span[1]/span[2]/span[2]")
+                    price = driver.find_element(By.CLASS_NAME, "a-price-whole")
+                    price_text = price.text
+                except:
+                    price_text="price not found"
 
                 # Coupon scraping
                 try:
@@ -111,13 +122,16 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                 except:
                     min_price=""
 
-                row = [asin,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+                if(getProductTitleFlag):
+                    row = [asin,product_title_text,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+                else:
+                    row = [asin,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
 
                 with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                     csv.writer(file).writerow(row)
                 print(f"Written data for ASIN {asin}, Pincode {location}")
 
-                if(seller_count!=""):
+                if(seller_count!="" and getCompetitorFlag):
                     
                     open_panel=driver.find_element(By.XPATH,'//*[@id="aod-ingress-link"]')
                     open_panel.click()
@@ -146,14 +160,18 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                                 free_delivery=delivery_time_element.text
 
                                 try:
-                                    print("entered")
-                                    label = seller.find_element(By.XPATH, "//span[contains(@id, 'couponText')]")
+                                    # label = seller.find_element(By.XPATH, "//span[contains(@id, 'couponText')]")
+                                    coupon_text_element=seller.find_element(By.CLASS_NAME,"couponLabelText")
                                     coupon_text = label.text
-                                    print("coupon text:"+coupon_text)
                                 except:
                                     coupon_text = "no discount"
                                 
-                                row=[asin,"", timestamp, location, city, seller_text, price_text ,f'{coupon_text}',free_delivery,"","",""]
+
+                                if(getProductTitleFlag):
+                                    row=[asin, product_title_text,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
+                                else:
+                                    row=[asin,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
+
                                 with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                                     csv.writer(file).writerow(row)
                             except:
@@ -169,54 +187,64 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
             except Exception as e:
                 print(f"Error at Pincode {location}, ASIN {asin}: {e}")
 
-                row = [asin,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+                if(getProductTitleFlag):
+                    row = [asin,product_title_text,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+                else:
+                    row = [asin,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+
+
                 # Leave seller_text and price_text empty
                 
                 with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
                     csv.writer(file).writerow(row)
                 print(f"Written data for ASIN {asin}, Pincode {location}")
 
-                try:
-                    open_panel=driver.find_element(By.XPATH,'//*[@id="buybox-see-all-buying-choices"]/span/a')
-                    open_panel.click()
-                    time.sleep(2)
+                if(getCompetitorFlag):
+                    try:
+                        open_panel=driver.find_element(By.XPATH,'//*[@id="buybox-see-all-buying-choices"]/span/a')
+                        open_panel.click()
+                        time.sleep(2)
 
-                    competitor_sellers=driver.find_elements(By.XPATH,'//*[@id="aod-offer"]')
-                    time.sleep(2)
-                    for seller in competitor_sellers:
-                        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        city = city_map.get(location, "Unknown")
-                        seller_text = "no_buy_box"
-                        price_text = ""
-                        coupon_text=""
-                        free_delivery=""
+                        competitor_sellers=driver.find_elements(By.XPATH,'//*[@id="aod-offer"]')
+                        time.sleep(2)
+                        for seller in competitor_sellers:
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            city = city_map.get(location, "Unknown")
+                            seller_text = "no_buy_box"
+                            price_text = ""
+                            coupon_text=""
+                            free_delivery=""
 
-                        
-                        try:
-                            seller_name_element=seller.find_element(By.CSS_SELECTOR,'#aod-offer-soldBy > div > div > div.a-fixed-left-grid-col.a-col-right > a')
-                            seller_text=seller_name_element.text
-
-                            seller_price_element=seller.find_element(By.CLASS_NAME,'a-price-whole')
-                            price_text=seller_price_element.text
-
-                            delivery_time_element=seller.find_element(By.CSS_SELECTOR,'#mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE > span > span')
-                            free_delivery=delivery_time_element.text
-
-                            try:
-                                coupon_text_element=seller.find_element(By.XPATH,"//label[contains(@id, 'couponText')]")
-                                coupon_text=coupon_text_element.text
-                            except:
-                                coupon_text='no discount'
                             
-                            row=[asin,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","",""]
-                            with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
-                                csv.writer(file).writerow(row)
-                        except:
-                            pass 
+                            try:
+                                seller_name_element=seller.find_element(By.CSS_SELECTOR,'#aod-offer-soldBy > div > div > div.a-fixed-left-grid-col.a-col-right > a')
+                                seller_text=seller_name_element.text
+
+                                seller_price_element=seller.find_element(By.CLASS_NAME,'a-price-whole')
+                                price_text=seller_price_element.text
+
+                                delivery_time_element=seller.find_element(By.CSS_SELECTOR,'#mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE > span > span')
+                                free_delivery=delivery_time_element.text
+
+                                try:
+                                    coupon_text_element=seller.find_element(By.CLASS_NAME,"couponLabelText")
+                                    coupon_text=coupon_text_element.text
+                                except:
+                                    coupon_text='no discount'
+                                
+                                if(getProductTitleFlag):
+                                    row=[asin,product_title_text,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","",""]
+                                else:
+                                    row=[asin,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","",""]
+
+                                with open(output_filename, mode='a', newline='', encoding='utf-8') as file:
+                                    csv.writer(file).writerow(row)
+                            except:
+                                pass 
 
 
-                except:
-                    print("no compititor!!")
+                    except:
+                        print("no compititor!!")
                         
                 
 
@@ -226,8 +254,8 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
 
 
 # scrapper initializer
-def amazon_main(locations, asin_list, host_url, output_filename, city_map):
+def amazon_main(locations, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag):
     driver = initialize_driver()
-    enter_location(driver, locations, asin_list, host_url, output_filename, city_map)
+    enter_location(driver, locations, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag)
     driver.quit()
 

@@ -45,7 +45,7 @@ def send_email(output_filename, recipient_email,pincodes):
         print(f"Error sending email: {e}")
 
 # Main function
-def main(company,pincodes,city_map,sendMailFlag):
+def main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag):
     
     # Define the directory    
     output_dir = "./amazon_data"
@@ -74,13 +74,17 @@ def main(company,pincodes,city_map,sendMailFlag):
     try:
         with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
+            if(getProductTitleFlag):
+                writer.writerow(['Asin','product_title','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
+            else:
+                writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
+
         print(f"CSV header written to {output_filename}")
     except Exception as e:
         print(f"Error creating CSV: {e}")
         exit()
 
-    amazon_main(pincodes, asin_list, host_url, output_filename, city_map)
+    amazon_main(pincodes, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag)
 
     print(f"\nAll data written to {output_filename}")
 
@@ -107,5 +111,7 @@ if __name__ == "__main__":
         "700002": "Kolkata",
         "226001":"Lucknow"
     }
-    sendMailFlag=True    
-    main(company,pincodes,city_map,sendMailFlag)
+    sendMailFlag=False    
+    getCompetitorFlag=True
+    getProductTitleFlag=True 
+    main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag)
