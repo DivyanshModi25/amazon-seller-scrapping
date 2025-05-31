@@ -141,7 +141,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                         competitor_sellers=driver.find_elements(By.XPATH,'//*[@id="aod-offer"]')
                         time.sleep(2)
                         for seller in competitor_sellers:
-                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
                             city = city_map.get(location, "Unknown")
                             seller_text = "no_buy_box"
                             price_text = ""
@@ -208,7 +208,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                         competitor_sellers=driver.find_elements(By.XPATH,'//*[@id="aod-offer"]')
                         time.sleep(2)
                         for seller in competitor_sellers:
-                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
                             city = city_map.get(location, "Unknown")
                             seller_text = "no_buy_box"
                             price_text = ""
