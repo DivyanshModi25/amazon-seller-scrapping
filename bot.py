@@ -123,7 +123,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                     min_price=""
 
                 if(getProductTitleFlag):
-                    row = [asin,product_title_text,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+                    row = [asin,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price,product_title_text]
                 else:
                     row = [asin,1, timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
 
@@ -168,7 +168,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                                 
 
                                 if(getProductTitleFlag):
-                                    row=[asin, product_title_text,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
+                                    row=[asin,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","","", product_title_text]
                                 else:
                                     row=[asin,"", timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,"","",""]
 
@@ -188,7 +188,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                 print(f"Error at Pincode {location}, ASIN {asin}: {e}")
 
                 if(getProductTitleFlag):
-                    row = [asin,product_title_text,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
+                    row = [asin,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price,product_title_text]
                 else:
                     row = [asin,1,timestamp, location, city, seller_text, price_text ,coupon_text,free_delivery,fastest_delivery,seller_count,min_price]
 
@@ -233,7 +233,7 @@ def enter_location(driver, locations, asin_list, host_url, output_filename, city
                                     coupon_text='no discount'
                                 
                                 if(getProductTitleFlag):
-                                    row=[asin,product_title_text,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","",""]
+                                    row=[asin,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","","",product_title_text]
                                 else:
                                     row=[asin,"", timestamp, location, city, seller_text, price_text ,"",free_delivery,"","",""]
 
