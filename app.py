@@ -12,13 +12,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # emailing function
-def send_email(output_filename, recipient_email,pincodes):
+def send_email(output_filename, recipient_email,pincodes,company):
     timestamp_now = datetime.now().strftime("Date: %d-%m-%Y TIME:%H:%M:%S")
 
     sender_email = os.getenv("SENDER_EMAIL")  
     sender_password = os.getenv("SENDER_PASSWORD") 
     subject = f"Amazon Scraped Data CSV for - {timestamp_now}"
-    body = f"Please find the attached CSV file containing the scraped data dated - {timestamp_now} for pincodes :- {pincodes}"
+    body = f"Please find the attached CSV file containing the scraped data dated for {company} - {timestamp_now} for pincodes :- {pincodes} "
 
     # Create Email Message
     msg = EmailMessage()
@@ -91,7 +91,7 @@ def main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitl
     # Send email after CSV is created
     if(sendMailFlag):
         recipient_emails = os.getenv("RECIPIENT_EMAIL")
-        send_email(output_filename, recipient_emails,pincodes)
+        send_email(output_filename, recipient_emails,pincodes,company)
 
 
 
