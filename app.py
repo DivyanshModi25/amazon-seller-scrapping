@@ -143,6 +143,9 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
 
     temp_files = []
 
+    # with Pool(processes=min(4, len(pincodes))) as pool:
+    #     temp_files = pool.map(scrape_single_location, tasks)
+
     with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
         futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
         for future in as_completed(futures):
