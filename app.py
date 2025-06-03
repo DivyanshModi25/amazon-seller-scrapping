@@ -9,6 +9,7 @@ from bot import amazon_main
 from dotenv import load_dotenv
 from multiprocessing import Pool
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 load_dotenv()
@@ -67,10 +68,9 @@ def scrape_single_location(args):
 
 
 
+
 # Main function
-# def main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag):
-    
-    
+# def main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag):    
 #     output_dir = "./amazon_data"
 #     os.makedirs(output_dir, exist_ok=True)
 
@@ -116,40 +116,45 @@ def scrape_single_location(args):
 #         send_email(output_filename, recipient_emails,pincodes,company)
 
 
-
 def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag):
+    
     os.makedirs("./amazon_data", exist_ok=True)
     csv_file_path = f'./{company}.csv'
 
     if not os.path.exists(csv_file_path):
-        print(f"File not found: {csv_file_path}")
+        print(f"❌ File not found: {csv_file_path}")
         return
 
     try:
         df = pd.read_csv(csv_file_path)
         asin_list = df.iloc[:, 0].tolist()
     except Exception as e:
-        print(f"Error reading CSV: {e}")
+        print(f"❌ Error reading CSV: {e}")
         return
 
     host_url = "https://www.amazon.in/dp/"
     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     final_output = f"./amazon_data/{company}_{timestamp_now}.csv"
 
-    # Prepare multiprocessing tasks
     tasks = [
         (pincode, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlag)
         for pincode in pincodes
     ]
 
-    print(f"Starting parallel scraping for {len(pincodes)} pincodes...")
+    temp_files = []
 
-    with Pool(processes=min(4, len(pincodes))) as pool:
-        temp_files = pool.map(scrape_single_location, tasks)
+    # with Pool(processes=min(4, len(pincodes))) as pool:
+    #     temp_files = pool.map(scrape_single_location, tasks)
 
-    print("Merging results into final CSV...")
+    with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
+        futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
+        for future in as_completed(futures):
+            temp_file = future.result()
+            if temp_file:
+                temp_files.append(temp_file)
 
-    # Merge all temp CSVs into one
+    print("📦 Merging all temporary files...")
+
     with open(final_output, mode='w', newline='', encoding='utf-8') as outfile:
         writer = csv.writer(outfile)
         header_written = False
@@ -164,7 +169,7 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
                     writer.writerow(row)
             os.remove(temp_file)
 
-    print(f"Final data written to {final_output}")
+    print(f"✅ Final merged data saved to {final_output}")
 
     if sendMailFlag:
         recipient_emails = os.getenv("RECIPIENT_EMAIL")
