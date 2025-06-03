@@ -144,16 +144,16 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
     temp_files = []
 
     # multiprocessing(cores utilized)
-    # with Pool(processes=min(4, len(pincodes))) as pool:
-    #     temp_files = pool.map(scrape_single_location, tasks)
+    with Pool(processes=min(4, len(pincodes))) as pool:
+        temp_files = pool.map(scrape_single_location, tasks)
 
-    # multithreading
-    with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
-        futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
-        for future in as_completed(futures):
-            temp_file = future.result()
-            if temp_file:
-                temp_files.append(temp_file)
+    # # multithreading
+    # with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
+    #     futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
+    #     for future in as_completed(futures):
+    #         temp_file = future.result()
+    #         if temp_file:
+    #             temp_files.append(temp_file)
 
     print("📦 Merging all temporary files...")
 
