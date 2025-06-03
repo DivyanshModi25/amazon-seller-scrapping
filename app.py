@@ -9,6 +9,7 @@ from bot import amazon_main
 from dotenv import load_dotenv
 from multiprocessing import Pool
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 load_dotenv()
@@ -48,21 +49,41 @@ def send_email(output_filename, recipient_email,pincodes,company):
 
 
 
+# def scrape_single_location(args):
+#     location, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlagHeader = args
+#     timestamp = datetime.now().strftime("%d%m%Y%H%M%S")
+#     temp_file = f"./amazon_data/temp_{location}_{timestamp}.csv"
+
+#     # Write header for individual file
+#     with open(temp_file, mode='w', newline='', encoding='utf-8') as file:
+#         writer = csv.writer(file)
+#         if getProductTitleFlagHeader:
+#             writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])
+#         else:
+#             writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])
+
+#     amazon_main([location], asin_list, host_url, temp_file, city_map, getCompetitorFlag, getProductTitleFlag)
+#     return temp_file
+
+
+
 def scrape_single_location(args):
     location, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlagHeader = args
-    timestamp = datetime.now().strftime("%d%m%Y%H%M%S")
-    temp_file = f"./amazon_data/temp_{location}_{timestamp}.csv"
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', newline='', encoding='utf-8', suffix='.csv', dir='./amazon_data') as tmpfile:
+            writer = csv.writer(tmpfile)
+            if getProductTitleFlagHeader:
+                writer.writerow(['Asin','buy_box_flag','Timestamp','Pincode','City','Seller','Price','coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])
+            else:
+                writer.writerow(['Asin','buy_box_flag','Timestamp','Pincode','City','Seller','Price','coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])
+            temp_file_path = tmpfile.name
 
-    # Write header for individual file
-    with open(temp_file, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        if getProductTitleFlagHeader:
-            writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])
-        else:
-            writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])
+        amazon_main([location], asin_list, host_url, temp_file_path, city_map, getCompetitorFlag, getProductTitleFlag)
+        return temp_file_path
 
-    amazon_main([location], asin_list, host_url, temp_file, city_map, getCompetitorFlag, getProductTitleFlag)
-    return temp_file
+    except Exception as e:
+        print(f"❌ Error scraping location {location}: {e}")
+        return None
 
 
 
@@ -117,39 +138,95 @@ def scrape_single_location(args):
 
 
 
+# def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag):
+#     os.makedirs("./amazon_data", exist_ok=True)
+#     csv_file_path = f'./{company}.csv'
+
+#     if not os.path.exists(csv_file_path):
+#         print(f"File not found: {csv_file_path}")
+#         return
+
+#     try:
+#         df = pd.read_csv(csv_file_path)
+#         asin_list = df.iloc[:, 0].tolist()
+#     except Exception as e:
+#         print(f"Error reading CSV: {e}")
+#         return
+
+#     host_url = "https://www.amazon.in/dp/"
+#     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+#     final_output = f"./amazon_data/{company}_{timestamp_now}.csv"
+
+#     # Prepare multiprocessing tasks
+#     tasks = [
+#         (pincode, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlag)
+#         for pincode in pincodes
+#     ]
+
+#     print(f"Starting parallel scraping for {len(pincodes)} pincodes...")
+
+#     with Pool(processes=min(4, len(pincodes))) as pool:
+#         temp_files = pool.map(scrape_single_location, tasks)
+
+#     print("Merging results into final CSV...")
+
+#     # Merge all temp CSVs into one
+#     with open(final_output, mode='w', newline='', encoding='utf-8') as outfile:
+#         writer = csv.writer(outfile)
+#         header_written = False
+#         for temp_file in temp_files:
+#             with open(temp_file, mode='r', encoding='utf-8') as infile:
+#                 reader = csv.reader(infile)
+#                 header = next(reader)
+#                 if not header_written:
+#                     writer.writerow(header)
+#                     header_written = True
+#                 for row in reader:
+#                     writer.writerow(row)
+#             os.remove(temp_file)
+
+#     print(f"Final data written to {final_output}")
+
+#     if sendMailFlag:
+#         recipient_emails = os.getenv("RECIPIENT_EMAIL")
+#         send_email(final_output, recipient_emails, pincodes, company)
+
+
 def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag):
     os.makedirs("./amazon_data", exist_ok=True)
     csv_file_path = f'./{company}.csv'
 
     if not os.path.exists(csv_file_path):
-        print(f"File not found: {csv_file_path}")
+        print(f"❌ File not found: {csv_file_path}")
         return
 
     try:
         df = pd.read_csv(csv_file_path)
         asin_list = df.iloc[:, 0].tolist()
     except Exception as e:
-        print(f"Error reading CSV: {e}")
+        print(f"❌ Error reading CSV: {e}")
         return
 
     host_url = "https://www.amazon.in/dp/"
     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     final_output = f"./amazon_data/{company}_{timestamp_now}.csv"
 
-    # Prepare multiprocessing tasks
     tasks = [
         (pincode, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlag)
         for pincode in pincodes
     ]
 
-    print(f"Starting parallel scraping for {len(pincodes)} pincodes...")
+    temp_files = []
 
-    with Pool(processes=min(4, len(pincodes))) as pool:
-        temp_files = pool.map(scrape_single_location, tasks)
+    with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
+        futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
+        for future in as_completed(futures):
+            temp_file = future.result()
+            if temp_file:
+                temp_files.append(temp_file)
 
-    print("Merging results into final CSV...")
+    print("📦 Merging all temporary files...")
 
-    # Merge all temp CSVs into one
     with open(final_output, mode='w', newline='', encoding='utf-8') as outfile:
         writer = csv.writer(outfile)
         header_written = False
@@ -164,7 +241,7 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
                     writer.writerow(row)
             os.remove(temp_file)
 
-    print(f"Final data written to {final_output}")
+    print(f"✅ Final merged data saved to {final_output}")
 
     if sendMailFlag:
         recipient_emails = os.getenv("RECIPIENT_EMAIL")
