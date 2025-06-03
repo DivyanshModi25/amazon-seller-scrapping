@@ -116,6 +116,7 @@ def scrape_single_location(args):
 #         send_email(output_filename, recipient_emails,pincodes,company)
 
 
+
 def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag):
     os.makedirs("./amazon_data", exist_ok=True)
     csv_file_path = f'./{company}.csv'
