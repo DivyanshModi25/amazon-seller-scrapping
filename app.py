@@ -93,22 +93,23 @@ def scrape_single_location(args):
 #     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 #     output_filename = f"./amazon_data/{company}_{timestamp_now}.csv"
 
-#     try:
-#         with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
-#             writer = csv.writer(file)
-#             if(getProductTitleFlag):
-#                 writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])  # Header
-#             else:
-#                 writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
 
-#         print(f"CSV header written to {output_filename}")
-#     except Exception as e:
-#         print(f"Error creating CSV: {e}")
-#         exit()
+    # try:
+    #     with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
+    #         writer = csv.writer(file)
+    #         if(getProductTitleFlag):
+    #             writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])  # Header
+    #         else:
+    #             writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
 
-#     amazon_main(pincodes, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag)
+    #     print(f"CSV header written to {output_filename}")
+    # except Exception as e:
+    #     print(f"Error creating CSV: {e}")
+    #     exit()
 
-#     print(f"\nAll data written to {output_filename}")
+    # amazon_main(pincodes, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag)
+
+    # print(f"\nAll data written to {output_filename}")
 
 #     # Send email after CSV is created
 #     if(sendMailFlag):
@@ -116,8 +117,8 @@ def scrape_single_location(args):
 #         send_email(output_filename, recipient_emails,pincodes,company)
 
 
-def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag):
-    
+def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag , useMultithreadingFlag):
+     
     os.makedirs("./amazon_data", exist_ok=True)
     csv_file_path = f'./{company}.csv'
 
@@ -136,42 +137,63 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     final_output = f"./amazon_data/{company}_{timestamp_now}.csv"
 
-    tasks = [
-        (pincode, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlag)
-        for pincode in pincodes
-    ]
 
-    temp_files = []
+    if(useMultithreadingFlag):
+        tasks = [
+            (pincode, asin_list, host_url, city_map, getCompetitorFlag, getProductTitleFlag, getProductTitleFlag)
+            for pincode in pincodes
+        ]
 
-    # multiprocessing(cores utilized)
-    # with Pool(processes=min(4, len(pincodes))) as pool:
-    #     temp_files = pool.map(scrape_single_location, tasks)
+        temp_files = []
 
-    # # multithreading
-    with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
-        futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
-        for future in as_completed(futures):
-            temp_file = future.result()
-            if temp_file:
-                temp_files.append(temp_file)
+        # multiprocessing(cores utilized)
+        # with Pool(processes=min(4, len(pincodes))) as pool:
+        #     temp_files = pool.map(scrape_single_location, tasks)
 
-    print("📦 Merging all temporary files...")
+        # # multithreading
+        with ThreadPoolExecutor(max_workers=min(4, len(pincodes))) as executor:
+            futures = {executor.submit(scrape_single_location, task): task[0] for task in tasks}
+            for future in as_completed(futures):
+                temp_file = future.result()
+                if temp_file:
+                    temp_files.append(temp_file)
 
-    with open(final_output, mode='w', newline='', encoding='utf-8') as outfile:
-        writer = csv.writer(outfile)
-        header_written = False
-        for temp_file in temp_files:
-            with open(temp_file, mode='r', encoding='utf-8') as infile:
-                reader = csv.reader(infile)
-                header = next(reader)
-                if not header_written:
-                    writer.writerow(header)
-                    header_written = True
-                for row in reader:
-                    writer.writerow(row)
-            os.remove(temp_file)
+        print("📦 Merging all temporary files...")
 
-    print(f"✅ Final merged data saved to {final_output}")
+        with open(final_output, mode='w', newline='', encoding='utf-8') as outfile:
+            writer = csv.writer(outfile)
+            header_written = False
+            for temp_file in temp_files:
+                with open(temp_file, mode='r', encoding='utf-8') as infile:
+                    reader = csv.reader(infile)
+                    header = next(reader)
+                    if not header_written:
+                        writer.writerow(header)
+                        header_written = True
+                    for row in reader:
+                        writer.writerow(row)
+                os.remove(temp_file)
+
+        print(f"✅ Final merged data saved to {final_output}")
+
+    else:
+        try:
+            with open(final_output, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                if(getProductTitleFlag):
+                    writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])  # Header
+                else:
+                    writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
+
+            print(f"CSV header written to {final_output}")
+        except Exception as e:
+            print(f"Error creating CSV: {e}")
+            exit()
+
+        amazon_main(pincodes, asin_list, host_url, final_output, city_map,getCompetitorFlag,getProductTitleFlag)
+
+        print(f"\nAll data written to {final_output}")
+
 
     if sendMailFlag:
         recipient_emails = os.getenv("RECIPIENT_EMAIL")
@@ -196,4 +218,5 @@ if __name__ == "__main__":
     sendMailFlag=True    
     getCompetitorFlag=True
     getProductTitleFlag=False 
-    main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag)
+    useMultithreadingFlag=False
+    main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag,useMultithreadingFlag)
