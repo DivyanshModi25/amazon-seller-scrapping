@@ -69,54 +69,6 @@ def scrape_single_location(args):
 
 
 
-# Main function
-# def main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag):    
-#     output_dir = "./amazon_data"
-#     os.makedirs(output_dir, exist_ok=True)
-
-#     csv_file_path = f'./{company}.csv'  # Input CSV path
-
-#     if not os.path.exists(csv_file_path):
-#         print(f"File not found: {csv_file_path}")
-#         exit()
-
-#     try:
-#         df = pd.read_csv(csv_file_path)
-#         asin_list = df.iloc[:, 0].tolist()
-#     except Exception as e:
-#         print(f"Error reading CSV: {e}")
-#         exit()
-
-    
-#     host_url = "https://www.amazon.in/dp/"
-
-#     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-#     output_filename = f"./amazon_data/{company}_{timestamp_now}.csv"
-
-
-    # try:
-    #     with open(output_filename, mode='w', newline='', encoding='utf-8') as file:
-    #         writer = csv.writer(file)
-    #         if(getProductTitleFlag):
-    #             writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price','product_title'])  # Header
-    #         else:
-    #             writer.writerow(['Asin','buy_box_flag' ,'Timestamp', 'Pincode', 'City', 'Seller', 'Price', 'coupon_text','Free Delivery','Fastest Delivery','seller count','Minimum Price'])  # Header
-
-    #     print(f"CSV header written to {output_filename}")
-    # except Exception as e:
-    #     print(f"Error creating CSV: {e}")
-    #     exit()
-
-    # amazon_main(pincodes, asin_list, host_url, output_filename, city_map,getCompetitorFlag,getProductTitleFlag)
-
-    # print(f"\nAll data written to {output_filename}")
-
-#     # Send email after CSV is created
-#     if(sendMailFlag):
-#         recipient_emails = os.getenv("RECIPIENT_EMAIL")
-#         send_email(output_filename, recipient_emails,pincodes,company)
-
-
 def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProductTitleFlag , useMultithreadingFlag):
      
     os.makedirs("./amazon_data", exist_ok=True)
