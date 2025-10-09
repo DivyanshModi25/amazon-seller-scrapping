@@ -75,20 +75,20 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
     csv_file_path = f'./{company}.csv'
 
     if not os.path.exists(csv_file_path):
-        print(f"❌ File not found: {csv_file_path}")
+        print(f"File not found: {csv_file_path}")
         return
 
     try:
         df = pd.read_csv(csv_file_path)
         asin_list = df.iloc[:, 0].tolist()
     except Exception as e:
-        print(f"❌ Error reading CSV: {e}")
+        print(f"Error reading CSV: {e}")
         return
 
     host_url = "https://www.amazon.in/dp/"
     timestamp_now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     final_output = f"./amazon_data/{company}_{timestamp_now}.csv"
-
+    
 
     if(useMultithreadingFlag):
         tasks = [
@@ -110,7 +110,7 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
                 if temp_file:
                     temp_files.append(temp_file)
 
-        print("📦 Merging all temporary files...")
+        print("Merging all temporary files...")
 
         with open(final_output, mode='w', newline='', encoding='utf-8') as outfile:
             writer = csv.writer(outfile)
@@ -126,7 +126,7 @@ def main(company, pincodes, city_map, sendMailFlag, getCompetitorFlag, getProduc
                         writer.writerow(row)
                 os.remove(temp_file)
 
-        print(f"✅ Final merged data saved to {final_output}")
+        print(f"Final merged data saved to {final_output}")
 
     else:
         try:
@@ -169,6 +169,6 @@ if __name__ == "__main__":
     }
     sendMailFlag=True    
     getCompetitorFlag=True
-    getProductTitleFlag=False 
-    useMultithreadingFlag=False
+    getProductTitleFlag=True 
+    useMultithreadingFlag=True
     main(company,pincodes,city_map,sendMailFlag,getCompetitorFlag,getProductTitleFlag,useMultithreadingFlag)
